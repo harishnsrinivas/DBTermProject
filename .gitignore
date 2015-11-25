@@ -1,0 +1,4 @@
+# file types to be ignored
+
+*.pyc
+*.swp

@@ -12,7 +12,8 @@ class UserProfile(models.Model):
 
     USER_TYPES = (
         ("Client", CLIENT),
-        ("Trader", TRADER)
+        ("Trader", TRADER),
+        ("Manager", MANAGER)
     )
 
     user_type = models.IntegerField(choices=USER_TYPES)
@@ -44,8 +45,6 @@ class Client(models.Model):
     user_profile = models.ForeignKey(UserProfile)
     mobile = models.CharField(max_length=10)
     telephone = models.CharField(max_length=10)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
     money = models.DecimalField(max_digits=10, decimal_places=3)
     oil = models.DecimalField(max_digits=10, decimal_places=3)
     rating = models.ForeignKey(Rating)
@@ -54,8 +53,10 @@ class Client(models.Model):
 
 class Trader(models.Model):
     user_profile = models.ForeignKey(UserProfile)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+
+
+class Manager(models.Model):
+    user_profile = models.ForeignKey(UserProfile)
 
 
 class Oil(models.Model):
@@ -70,11 +71,13 @@ class Transaction(models.Model):
         ("Buy", SELL),
     )
 
-    STATUS_REJECT = 0
+    STATUS_CANCELED = 0
     STATUS_SUCCESS = 1
+    STATUS_PENDING = 2
     STATUS_OPTIONS = (
         ("Success", STATUS_SUCCESS),
-        ("Reject", STATUS_REJECT)
+        ("Canceled", STATUS_CANCELED),
+        ("Pending", STATUS_PENDING)
     )
 
     COMM_CASH = 0
