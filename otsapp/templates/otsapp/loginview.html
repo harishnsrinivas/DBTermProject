@@ -1,44 +1,8 @@
 <html>
+	{% load static %}
 	<head>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
-		<script type="text/javascript">
-			$(function() {
-				$.ajaxSetup({
-				    beforeSend: function(xhr, settings) {
-				        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-				            // Only send the token to relative URLs i.e. locally.
-				            xhr.setRequestHeader("X-CSRFToken", "{{csrf_token}}");
-				        }
-				    }
-				});
-    			
-    			$("form[name='login']").submit(function(ev){
-    				ev.preventDefault();
-    				var data = {"username":$("input[name='username']").val(), "password":$("input[name='password']").val()};
-    				/*$.post("/ots/user/login/",data).done(function(res){
-    					if(res&&res.success==false){
-    						$("div#status").html("Invalid login credentials");	
-    					}
-    					else{
-    						window.location.replace("/ots/user/home/");
-    					}
-    				});*/
-    				$.ajax({
-    					"type": "POST",
-			            "url": "/ots/user/login/",
-			            "data": data,
-			            'success': function(res){
-	    					if(res&&res.success==false){
-	    						$("div#status").html("Invalid login credentials");	
-	    					}
-	    					else{
-	    						window.location.replace("/ots/user/home/");
-	    					}
-			            },
-    				});
-    			});
-			});
-		</script>
+		<script type="text/javascript" src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/otsapp.js' %}"></script>
 	</head>
 	<body>
 		<form name="login" method="POST" accept-charset="utf-8">
