@@ -1,9 +1,10 @@
+import django
 import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(os.path.curdir))))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'OTS.settings'
-
+django.setup()
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -62,6 +63,24 @@ def populateData():
     Location.objects.create(street="2454 mccallum blvd", zipcode="76071", city="Newark", state="New Jersey")
     Location.objects.create(street="23461 mccallum blvd", zipcode="11218", city="Brooklyn", state="New York")
 
+     # populating data for trader
+    Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader1"))
+    Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader2"))
+    Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader3"))
+    Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader4"))
+
+    # populating data for client
+    Client.objects.create(user_profile=UserProfile.objects.get(user__username="chandni"), mobile="4697768542", telephone="9724467318", money=500.000,
+                          oil=50, rating=Rating.objects.get(level=0), location=Location.objects.get(zipcode="75252"))
+    Client.objects.create(user_profile=UserProfile.objects.get(user__username="gitanjali"), mobile="9136781547", telephone="7858864392", money=300.000,
+                          oil=40, rating=Rating.objects.get(level=0), location=Location.objects.get(zipcode="67205"))
+    Client.objects.create(user_profile=UserProfile.objects.get(user__username="srija"), mobile="8629683617", telephone="9739982651", money=450.000,
+                          oil=70, rating=Rating.objects.get(level=0), location=Location.objects.get(zipcode="76071"))
+    Client.objects.create(user_profile=UserProfile.objects.get(user__username="harish"), mobile="2124436717", telephone="7180764831", money=700.000,
+                          oil=90, rating=Rating.objects.get(level=0), location=Location.objects.get(zipcode="11218"))
+
+    # populating data for manager
+    Manager.objects.create(user_profile=UserProfile.objects.get(user__username="manager"))
 
 if __name__== "__main__":
     populateData()
