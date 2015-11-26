@@ -5,4 +5,5 @@ from otsapp import views
 urlpatterns = patterns('views',
     url(r'^$', views.index, name="index"),
     url(r'^user/login/$', views.login, name="login"),
+    url(r'^client/home/$', views.client_home, name="clientHome"),
 )

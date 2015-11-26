@@ -16,25 +16,25 @@ def populateData():
 
     # Populating data for user objects
 
-    User.objects.create(username="chandni", first_name="Chandni",
+    User.objects.create_user(username="chandni", first_name="Chandni",
                         last_name="Shankar", password="123456")
-    User.objects.create(username="gitanjali", first_name="Gitanjali",
+    User.objects.create_user(username="gitanjali", first_name="Gitanjali",
                         last_name="Hoige", password="123456")
-    User.objects.create(username="srija", first_name="Srija",
+    User.objects.create_user(username="srija", first_name="Srija",
                         last_name="Temburni", password="123456")
-    User.objects.create(username="harish", first_name="Harish",
+    User.objects.create_user(username="harish", first_name="Harish",
                         last_name="Srinivas", password="123456")
 
 
-    User.objects.create(username="trader1", first_name="Trader1",
+    User.objects.create_user(username="trader1", first_name="Trader1",
                         last_name="Trader1", password="123456")
-    User.objects.create(username="trader2", first_name="Trader2",
+    User.objects.create_user(username="trader2", first_name="Trader2",
                         last_name="Trader2", password="123456")
-    User.objects.create(username="trader3", first_name="Trader3",
+    User.objects.create_user(username="trader3", first_name="Trader3",
                         last_name="Trader3", password="123456")
-    User.objects.create(username="trader4", first_name="Trader4",
+    User.objects.create_user(username="trader4", first_name="Trader4",
                         last_name="Trader4", password="123456")
-    User.objects.create(username="manager", first_name="Manager",
+    User.objects.create_user(username="manager", first_name="Manager",
                         last_name="Manager", password="123456")
     
     # Populating data for user profile entries
