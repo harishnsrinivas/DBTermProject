@@ -1,1 +1,121 @@
-<h1>DUMMY TRADER HOME</h1>
+<html>
+	{% load static %}
+	<head>
+		<title>Trader Home</title>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"/>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/otsapp.css' %}"/>
+		<script type="text/javascript" src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/otsapp.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/underscore-min.js' %}"></script>
+	</head>
+	<body>
+		<script type="text/template" id="transaction-list-tmpl">
+			<div class="col-md-12">
+				<% if(search_term) { %>
+					<label>Results for search term "<%=search_term%>" </label>
+				<% } else { %>
+					<label>List of pending transactions</label>
+				<% } %>
+				<% if(transactions){ %>
+					<ul id="transaction-list">
+						<% _.each(transactions, function(t){ %>
+							<li id="<%-t.id%>" class="row transaction-item">
+								<div class="col-md-1">
+									<%-t.client_name%>
+								</div>
+								<div class="col-md-1">
+									<% if(t.tn_type == 0) { %>
+										Buy
+									<% } else { %>
+										Sell
+									<% } %>
+								</div>
+								<div class="col-md-2">
+									<%-t.oil_barrel%> Barrels
+								</div>
+								<div class="col-md-3">
+									<%-t.date%>
+								</div>
+								<div class="col-md-2">
+									cost : <%-t.tn_cost%>
+								</div>
+								<div class="col-md-3">
+									<% if(t.status == 0) { %>
+									Canceled : <%-t.modified_datetime%>
+									<% } else if (t.status == 1) { %>
+									Approved : <%-t.modified_datetime%>
+									<% } %>
+								</div>
+							</li>
+						<% }); %>
+					</ul>
+				<% } else { %>
+					<div>No matching transactions found</div>
+				<% } %>
+			</div>
+		</script>
+		<div id="clientHomeContainer" class="container">
+			<nav class="navbar navbar-default navbar-fixed-top">
+			  <div class="navbar-header">
+			  	<p class="navbar-text"><strong>Welcome {{firstname}}</strong></p>
+			  	<form class="navbar-form navbar-left" role="search">
+			        <div class="form-group">
+			          <input id="search-term" type="text" class="form-control" placeholder="Search transaction history">
+			        </div>
+			        <div class="form-group">
+			        	<select id="search-by" class="form-control">
+			        		<optgroup label="Search by">
+			        			<option value="0">Name</option>
+			        			<option value="1">Location</option>
+			        		</optgroup>
+			        	</select>
+			        </div>
+			        <button id="search-btn" class="btn btn-default">Submit</button>
+      			</form>
+			  </div>
+			  <div class="container">
+			    <button type="button" id="logout-btn" class="btn btn-default navbar-btn">Logout</button>
+			  </div>
+			</nav>
+			<div class="row clientTransactions">
+				<div class="col-md-12">
+					<label>List of pending transactions</label>
+					{% if transactions %}
+						<ul id="transaction-list">
+							{% for t in transactions %}
+								<li id="{{t.id}}" class="row transaction-item">
+									<div class="col-md-1">
+										{{t.client.user_profile.user.first_name}}
+									</div>
+									<div class="col-md-1">
+										{% if t.tn_type == 0 %}
+											Buy
+										{% else %}
+											Sell
+										{% endif %}
+									</div>
+									<div class="col-md-3">
+										{{t.oil_barrel}} Barrels
+									</div>
+									<div class="col-md-3">
+										{{t.date}}
+									</div>
+									<div class="col-md-2">
+										cost : {{t.tn_cost}}
+									</div>
+									<div class="col-md-2">
+										<div id="cancel-transaction" class="btn btn-primary btn-small">Reject</div>
+										<div id="approve-transaction" class="btn btn-primary btn-small">Approve</div>
+									</div>
+								</li>
+							{% endfor %}
+						</ul>
+					{% else %}
+						<div>No pending transactions to show</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

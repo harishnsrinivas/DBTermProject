@@ -1,1 +1,223 @@
-<h1>DUMMY CLIENT HOME</h1>
+<html>
+	{% load static %}
+	<head>
+		<title>Client Home</title>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"/>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/otsapp.css' %}"/>
+		<script type="text/javascript" src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/otsapp.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+	</head>
+	<body>
+		<div id="clientHomeContainer" class="container">
+			<nav class="navbar navbar-default navbar-fixed-top">
+			  <div class="navbar-header">
+			  	<p class="navbar-text"><strong>Welcome {{firstname}}</strong></p>
+			  </div>
+			  <div class="container">
+			    <button type="button" id="logout-btn" class="btn btn-default navbar-btn">Logout</button>
+			  </div>
+			</nav>
+			<div class="row balance-info">
+				<div class="col-md-12"> Cash balance : {{money}} </div>
+			</div>
+			<div class="row balance-info">
+				<div class="col-md-12"> Oil balance : {{oil}} </div>
+			</div>
+			<div class="row clientPendingTransactions">
+				<div class="col-md-12">
+					<label>List of pending transactions</label>
+					{% if pending_transactions %}
+						<ul id="transaction-list">
+							{% for t in pending_transactions %}
+								<li id="{{t.id}}" class="row transaction-item">
+									<div class="col-md-1">
+										{% if t.tn_type == 0 %}
+											Buy
+										{% else %}
+											Sell
+										{% endif %}
+									</div>
+									<div class="col-md-3">
+										{{t.oil_barrel}} Barrels
+									</div>
+									<div class="col-md-3">
+										{{t.date}}
+									</div>
+									<div class="col-md-2">
+										{{t.trader.user_profile.user.first_name}}
+									</div>
+									<div class="col-md-2">
+										cost : {{t.tn_cost}}
+									</div>
+									<div class="col-md-1">
+										<div id="cancel-transaction" class="btn btn-primary btn-small">Cancel</div>
+									</div>
+								</li>
+							{% endfor %}
+						</ul>
+					{% else %}
+						<div>No pending transactions to show</div>
+					{% endif %}
+				</div>
+			</div>
+      <div class="row clientPendingTransactions">
+        <div class="col-md-12">
+          <label>Your recent transactions</label>
+          {% if recent_transactions %}
+            <ul id="recent-transaction-list">
+              {% for t in recent_transactions %}
+                <li id="{{t.id}}" class="row transaction-item">
+                  <div class="col-md-1">
+                    {% if t.tn_type == 0 %}
+                      Buy
+                    {% else %}
+                      Sell
+                    {% endif %}
+                  </div>
+                  <div class="col-md-2">
+                    {{t.oil_barrel}} Barrels
+                  </div>
+                  <div class="col-md-3">
+                    {{t.date}}
+                  </div>
+                  <div class="col-md-2">
+                    cost : {{t.tn_cost}}
+                  </div>
+                  <div class="col-md-1">
+                    {{t.trader.user_profile.user.first_name}}
+                  </div>
+                  <div class="col-md-3">
+                    {% if t.status == 0 %}
+                      Canceled : {{t.modified_datetime}}
+                    {% elif t.status == 1 %}
+                      Approved : {{t.modified_datetime}}
+                    {% endif %}
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div>No recent transactions to show</div>
+          {% endif %}
+        </div>
+      </div>
+			<div class="row" id="new-transaction-container">
+				<div class="col-md-4">
+					<!-- Button trigger modal -->
+					<button id="new-transaction" type="button" class="btn btn-primary" data-toggle="modal" data-target="#transactionModal">
+					  New Transaction
+					</button>
+
+					<!-- Modal -->
+					<div class="modal fade" id="transactionModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+					  <div class="modal-dialog" role="document">
+					    <div class="modal-content">
+					      <div class="modal-header">
+					        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					        <h4 class="modal-title" id="myModalLabel">Make a new transaction</h4>
+					      </div>
+					      <div class="modal-body">
+                  <form class="form-horizontal">
+                    <fieldset>
+                    <!-- Multiple Radios -->
+                    <input type="hidden" name="oil-rate" value="{{current_oil_rate}}" />
+                    <input type="hidden" name="com-rate-cash" value="{{commission_cash}}" />
+                    <input type="hidden" name="com-rate-oil" value="{{commission_oil}}" />
+                    <div class="form-group">
+                      <label class="col-md-4 control-label" for="tn_type">Transaction type</label>
+                      <div class="col-md-4">
+                      <div class="radio">
+                        <label for="tn_type-0">
+                          <input type="radio" name="tn_type" id="tn_type-0" value="0" checked="checked">
+                          Buy
+                        </label>
+                      </div>
+                      <div class="radio">
+                        <label for="tn_type-1">
+                          <input type="radio" name="tn_type" id="tn_type-1" value="1">
+                          Sell
+                        </label>
+                      </div>
+                      </div>
+                    </div>
+
+                    <!-- Text input-->
+                    <div class="form-group">
+                      <label class="col-md-4 control-label" for="oil-amount">Amount of oil</label>  
+                      <div class="col-md-5">
+                      <input id="oil-amount" name="oil-amount" type="text" placeholder="Enter quantity in barrels" class="form-control input-md" required="">
+                        
+                      </div>
+                    </div>
+
+                    <!-- Multiple Radios -->
+                    <div class="form-group">
+                      <label class="col-md-4 control-label" for="com_type">Commission type</label>
+                      <div class="col-md-4">
+                      <div class="radio">
+                        <label for="com_type-0">
+                          <input type="radio" name="com_type" id="com_type-0" value=0 checked="checked">
+                          Cash ($)
+                        </label>
+                      </div>
+                      <div class="radio">
+                        <label for="com_type-1">
+                          <input type="radio" name="com_type" id="com_type-1" value=1>
+                          Oil (Barrels)
+                        </label>
+                      </div>
+                      </div>
+                    </div>
+
+                    <!-- Text input-->
+                    <div class="form-group">
+                      <label class="col-md-4 control-label" for="commission-value">Commission value</label>  
+                      <div class="col-md-4">
+                      <input id="commission-value" name="commission-value" type="text" placeholder="" class="form-control input-md" disabled>
+                      </div>
+                    </div>
+
+                    <!-- Text input-->
+                    <div class="form-group">
+                      <label class="col-md-4 control-label" for="tn-cost">Transaction value</label>  
+                      <div class="col-md-4">
+                      <input id="tn-cost" name="tn-cost" type="text" placeholder="" class="form-control input-md" disabled>
+                        
+                      </div>
+                    </div>
+                    <!-- Text input-->
+                    <div class="form-group">
+                      <label class="col-md-4 control-label" for="tn-trader">Trader</label>  
+                      <div class="col-md-4">
+                      <select id="tn-trader-list" name="tn-trader-list" class="form-control input-md">
+                        {% for t in traders %}
+                          {% if t.user_profile.user.id == trader.user_profile.user.id %}
+                            <option data-trader="{{t.user_profile.user.id}}" selected>
+                              {{t.user_profile.user.first_name}}
+                            </option>
+                          {% else %}
+                            <option data-trader="{{t.user_profile.user.id}}">
+                              {{t.user_profile.user.first_name}}
+                            </option>
+                          {% endif %}>
+                        {% endfor %}
+                      </select>
+                      </div>
+                    </div>
+                    </fieldset>
+                  </form>
+					      </div>
+					      <div class="modal-footer">
+					        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+					        <button type="button" class="btn btn-primary" id="submit-transaction" name="submit-transaction">Pay</button>
+                  <div id="tn-status"></div>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

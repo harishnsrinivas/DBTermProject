@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.utils import timezone
 from datetime import datetime
 
 
@@ -17,7 +18,7 @@ class UserProfile(models.Model):
     )
 
     user_type = models.IntegerField(choices=USER_TYPES)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User,related_name="user")
 
 
 class Rating(models.Model):
@@ -42,7 +43,7 @@ class Location(models.Model):
 
 
 class Client(models.Model):
-    user_profile = models.ForeignKey(UserProfile)
+    user_profile = models.ForeignKey(UserProfile,related_name="user_profile")
     mobile = models.CharField(max_length=10)
     telephone = models.CharField(max_length=10)
     money = models.DecimalField(max_digits=10, decimal_places=3)
@@ -72,10 +73,10 @@ class Transaction(models.Model):
     )
 
     STATUS_CANCELED = 0
-    STATUS_SUCCESS = 1
+    STATUS_APPROVED = 1
     STATUS_PENDING = 2
     STATUS_OPTIONS = (
-        ("Success", STATUS_SUCCESS),
+        ("Approved", STATUS_APPROVED),
         ("Canceled", STATUS_CANCELED),
         ("Pending", STATUS_PENDING)
     )
@@ -93,8 +94,8 @@ class Transaction(models.Model):
     oil_barrel = models.DecimalField(max_digits=10, decimal_places=3)
     oil_unit_rate = models.DecimalField(max_digits=10, decimal_places=3)
     tn_cost = models.DecimalField(max_digits=10, decimal_places=3)
-    date = models.DateTimeField(default=datetime.utcnow())
-    modified_datetime = models.DateTimeField(default=None)
+    date = models.DateTimeField(default=timezone.now())
+    modified_datetime = models.DateTimeField(default=None,null=True)
     status = models.IntegerField(choices=STATUS_OPTIONS)
     comm_type = models.IntegerField(choices=COMMISSION_TYPES)
     comm_value = models.DecimalField(max_digits=10, decimal_places=3)

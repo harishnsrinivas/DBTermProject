@@ -1,12 +1,19 @@
+import json
+import pytz
+from datetime import datetime
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse,HttpResponseRedirect
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-import json
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
+from django.db.models import Sum,Count
 
-from otsapp.models import UserProfile
+from otsapp.models import UserProfile, Transaction,\
+    Client, Trader, Oil, Rating
 
 
 
@@ -36,18 +43,183 @@ def logout(request):
     auth.logout(request)
     return HttpResponseRedirect("/ots/")
 
-
+def get_local_tz(tn):
+    local_tz = pytz.timezone('US/Central')
+    tn.date = tn.date.replace(tzinfo=pytz.utc).astimezone(local_tz)
+    return tz
 
 def home_dashborad(request):
     if request.method == "GET":
         user = request.user
         user_prof = UserProfile.objects.get(user=user)
         if user_prof.user_type == 0:
+            client = Client.objects.get(user_profile=user_prof)
+            oil_rate = (Oil.objects.all()[0]).current_unit_price
+            #transactions = map(get_local_tz,Transaction.objects.filter(client__user_profile__user=user))
+            transactions = Transaction.objects.filter(client__user_profile__user=user)
+            import random
+            trader = random.choice(Trader.objects.all())
+            context = {
+                        "money":client.money, "oil":client.oil, "firstname":user.first_name, 
+                        "pending_transactions":[tn for tn in transactions if tn.status is 2],
+                        "recent_transactions":[tn for tn in transactions if tn.status != 2],
+                        "trader":trader, "current_oil_rate":oil_rate,
+                        "commission_cash":client.rating.commission_rate_cash,
+                        "commission_oil":client.rating.commission_rate_oil,
+                        "traders":Trader.objects.all()
+                    }
             _template = "otsapp/client_home.html"
         elif user_prof.user_type == 1:
+            transactions = Transaction.objects.filter(trader__user_profile__user=user,
+                    status=Transaction.STATUS_PENDING)
+            context = {"firstname":user.first_name, "transactions":transactions}
             _template = "otsapp/trader_home.html"
         else:
             _template = "otsapp/manager_home.html"
 
-        return render(request, _template)
+        return render(request, _template, context=context)
 
+
+def transaction(request):
+    if request.method == "POST":
+        user = request.user
+        data = json.loads(request.POST['data'])
+        print data
+        oil_rate = (Oil.objects.all()[0]).current_unit_price
+        if data.get('t_id',None):
+            try:
+                #local_tz = pytz.timezone('US/Central')
+                tn = Transaction.objects.get(id=data['t_id'])
+                if data['action'] is 1:
+                    client = tn.client
+                    tn.status = Transaction.STATUS_APPROVED
+                    tn.modified_datetime = timezone.now()
+                    tn.save()
+                    #current_utc = datetime.utcnow().replace(tzinfo=pytz.UTC)
+                    #frm_time = current_utc.astimezone(local_tz)
+                    #frm_time = datetime.combine(
+                    #        datetime.date(frm_time.date().year,
+                    #                      frm_time.date().month,
+                    #                      1),
+                    #                      datetime.min.time)
+                    #frm_time = frm_time.astimezone(pytz.UTC)
+                    cur_t = timezone.now()
+                    print Transaction.objects.filter(client=client,
+                            status=Transaction.STATUS_APPROVED,
+                            date__year=cur_t.year,
+                            date__month=cur_t.month).aggregate(
+                            Sum('oil_barrel'))
+
+                    if Transaction.objects.filter(client=client,
+                            status=Transaction.STATUS_APPROVED,
+                            date__year=cur_t.year,
+                            date__month=cur_t.month).aggregate(
+                            Sum('oil_barrel'))['oil_barrel__sum'] >= 30:
+
+                        client.rating = Rating.objects.get(level=Rating.LEVEL_GOLD)
+                        
+                    if tn.tn_type is 0:
+                        client.money -= tn.tn_cost
+                    else:
+                         client.money += tn.tn_cost
+
+                    if tn.comm_type is 0:
+                        client.money -= tn.comm_value
+                    else:
+                        client.oil -= tn.comm_value 
+
+                    client.save()
+                else:
+                    tn.modified_datetime = timezone.now()
+                    tn.status = Transaction.STATUS_CANCELED
+                    tn.save()
+            except ObjectDoesNotExist:
+                return HttpResponse(json.dumps({"success":False}),
+                            content_type="application/json")
+            else:    
+                return HttpResponse(json.dumps({"success":True}),
+                                content_type="application/json")
+
+        client = Client.objects.get(user_profile__user=user)
+        proceed=False
+        if data['ttype'] is 0 and data['com_type'] is 0:
+            if client.money > data['tn_cost'] + data['com_value']:
+                proceed=True
+        elif data['ttype'] is 0 and data['com_type'] is 1:
+            if client.money >= data['tn_cost'] and client.oil >= data['com_value']:
+                proceed=True
+        elif data['ttype'] is 1 and data['com_type'] is 0:
+            if client.oil >= data['oil_amount'] and client.money > data['com_value']:
+                proceed=True
+        elif data['ttype'] is 1 and data['com_type'] is 1:
+            if client.oil >= data['oil_amount'] + data['com_value']:
+                proceed=True
+
+        if proceed:
+            trader = Trader.objects.get(user_profile__user__id=data['trader'])
+            Transaction.objects.create(client=client, trader=trader,
+                tn_type=data['ttype'], oil_barrel=data['oil_amount'],
+                tn_cost=data['tn_cost'], comm_type=data['com_type'],
+                comm_value=data['com_value'], oil_unit_rate=oil_rate,
+                status=Transaction.STATUS_PENDING)
+            
+            return HttpResponse(json.dumps({"success":True}),
+                            content_type="application/json")
+        else:
+            return HttpResponse(json.dumps({"success":False}),
+                            content_type="application/json")
+
+
+
+def filter_transactions(request):
+    if request.method == "POST":
+        user = request.user
+        trader = Trader.objects.get(user_profile__user=user)
+        data = json.loads(request.POST['data'])
+        from django.db.models import Q
+        transactions = []
+        if data['search_by'] == 0:
+            transactions = Transaction.objects.filter(
+                    Q(client__user_profile__user__first_name__istartswith=\
+                    data['search_term'])|Q(
+                    client__user_profile__user__first_name__iendswith=\
+                    data['search_term'])|Q(
+                    client__user_profile__user__last_name__istartswith=\
+                    data['search_term'])|Q(
+                    client__user_profile__user__last_name__iendswith=\
+                    data['search_term']),
+                    trader=trader, status__in=[Transaction.STATUS_APPROVED,\
+                    Transaction.STATUS_CANCELED])
+
+        elif data['search_by'] == 1:
+            transactions = Transaction.objects.filter(
+                    Q(client__location__street__icontains=\
+                    data['search_term'])|Q(
+                    client__location__zipcode__icontains=\
+                    data['search_term'])|Q(
+                    client__location__city__icontains=\
+                    data['search_term'])|Q(
+                    client__location__state__icontains=\
+                    data['search_term']),
+                    trader=trader, status__in=[Transaction.STATUS_APPROVED,\
+                    Transaction.STATUS_CANCELED])
+        
+        transactions = map(lambda t: {
+            "id": t.id,
+            "date": t.date.strftime("%a, %b %d %Y, %I:%M %p"),
+            "client_name": t.client.user_profile.user.first_name,
+            "tn_type": t.tn_type,
+            "tn_cost": str(t.tn_cost),
+            "comm_type": t.comm_type,
+            "comm_value": str(t.comm_value),
+            "status": t.status,
+            "oil_barrel": str(t.oil_barrel),
+            "modified_datetime": t.modified_datetime.strftime(
+                "%a, %b %d %Y, %I:%M %p")
+        }, transactions)
+        
+        return HttpResponse(json.dumps({
+            "firstname":user.first_name,
+            "transactions":transactions,
+            "search_term":data['search_term']
+        }), content_type="application/json")

@@ -1,24 +1,43 @@
 <html>
 	{% load static %}
 	<head>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"/>
 		<script type="text/javascript" src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
 		<script type="text/javascript" src="{% static 'js/otsapp.js' %}"></script>
 	</head>
 	<body>
-		<form name="login" method="POST" accept-charset="utf-8">
-		    <div>
-	        	<label for="username">Username</label>
-	        	<input type="text" name="username" placeholder="username"/>
-		    </div>
-	        <div>
-	        	<label for="password">Password</label>
-	        	<input type="password" name="password" placeholder="password"/>
-	        </div>
-	        <div>
-	        	<input type="submit" value="Login"/>
-	        </div>
-	        <div id="status">
-	        </div>
+		<form class="form-horizontal" name="login" method="POST" accept-charset="utf-8">
+	    	<fieldset>
+				<!-- Form Name -->
+				<legend>Sign in</legend>
+
+				<!-- Text input-->
+				<div class="form-group">
+				  <label class="col-md-4 control-label" for="username"></label>  
+				  <div class="col-md-4">
+				  <input id="username" name="username" type="text" placeholder="Username" class="form-control input-md" required="">
+				    
+				  </div>
+				</div>
+
+				<!-- Password input-->
+				<div class="form-group">
+				  <label class="col-md-4 control-label" for="password"></label>
+				  <div class="col-md-4">
+				    <input id="password" name="password" type="password" placeholder="password" class="form-control input-md" required="">
+				    
+				  </div>
+				</div>
+
+				<!-- Button -->
+				<div class="form-group">
+				  <label class="col-md-4 control-label" for="submit"></label>
+				  <div class="col-md-4">
+				    <input type="submit" name="submit" class="btn btn-primary" value="Sign in"/>
+				  </div>
+				</div>
+			</fieldset>
+			<div id="status"></div>
 		</form>
 	</body>
 </html>

@@ -51,8 +51,8 @@ def populateData():
     UserProfile.objects.create(user_type=2, user=User.objects.get(username="manager"))
 
     # Populating data for rating
-    Rating.objects.create(level=0, commission_rate_cash=5, commission_rate_oil=2);
-    Rating.objects.create(level=1, commission_rate_cash=10, commission_rate_oil=5);
+    Rating.objects.create(level=0, commission_rate_cash=10, commission_rate_oil=5);
+    Rating.objects.create(level=1, commission_rate_cash=5, commission_rate_oil=2);
 
     # Populating oil data
     Oil.objects.create(current_unit_price=3.78)

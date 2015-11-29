@@ -1,0 +1,32 @@
+div#clientHomeContainer{
+	margin-top: 100px;
+    margin-bottom: 50px;
+}
+
+div#clientHomeContainer button.navbar-btn{
+	float: right;
+}
+
+.balance-info{
+	margin:20 20 20 0;
+}
+
+div.clientPendingTransactions{
+	margin:20 20 20 0;
+}
+
+div#new-transaction-container{
+	margin:20 20 20 0;	
+}
+
+div#tn-status{
+	display: none;
+}
+
+ul#transaction-list,ul#recent-transaction-list{
+	list-style: none;
+}
+
+ul#transaction-list > li,ul#recent-transaction-list > li{
+	margin-top:15px; 
+}
