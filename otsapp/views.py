@@ -121,11 +121,21 @@ def home_dashborad(request):
                     dict1[date]=num
                 while tempdate<=end:
                     weeknum=0
-                    for i in range(0,7):                    
-                        tempdate=tempdate + timedelta(days=1)
-                        actualDate=str(tempdate.year)+'-'+ str(tempdate.month) +'-'+ str(tempdate.day)
-                        if (dict1.has_key(actualDate)):
-                            weeknum += dict1[actualDate]
+                    for i in range(0,7):
+                        if tempdate <= end:
+                            day=tempdate.day
+                            if day<=9:
+                                days = '0'+ str(day)
+                            else:
+                                days=str(day)
+                            actualDate=str(tempdate.year)+'-'+ str(tempdate.month) +'-'+ days
+                            if i == 0:
+                                s=actualDate
+                            elif i == 6:
+                                e=actualDate
+                            if (dict1.has_key(actualDate)):
+                                weeknum += dict1[actualDate]
+                            tempdate = tempdate + timedelta(days=1)
                     weekCounter+=1
                     newDict.append({'date':weekCounter,'created_count':weeknum})
         return HttpResponse(json.dumps({'newDict':newDict, 'view':group_by}), content_type="application/json")

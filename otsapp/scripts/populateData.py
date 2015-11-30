@@ -35,8 +35,20 @@ def populateData():
                         last_name="Trader3", password="123456")
     User.objects.create_user(username="trader4", first_name="Trader4",
                         last_name="Trader4", password="123456")
+    
+
+    User.objects.create_user(username="trader5", first_name="Trader5",
+                        last_name="Trader5", password="123456")
+    User.objects.create_user(username="trader6", first_name="Trader6",
+                        last_name="Trader6", password="123456")
+    User.objects.create_user(username="trader7", first_name="Trader7",
+                        last_name="Trader7", password="123456")
+    User.objects.create_user(username="trader8", first_name="Trader8",
+                        last_name="Trader8", password="123456")
+
     User.objects.create_user(username="manager", first_name="Manager",
                         last_name="Manager", password="123456")
+
     
     # Populating data for user profile entries
 
@@ -48,6 +60,10 @@ def populateData():
     UserProfile.objects.create(user_type=1, user=User.objects.get(username="trader2"))
     UserProfile.objects.create(user_type=1, user=User.objects.get(username="trader3"))
     UserProfile.objects.create(user_type=1, user=User.objects.get(username="trader4"))
+    UserProfile.objects.create(user_type=1, user=User.objects.get(username="trader5"))
+    UserProfile.objects.create(user_type=1, user=User.objects.get(username="trader6"))
+    UserProfile.objects.create(user_type=1, user=User.objects.get(username="trader7"))
+    UserProfile.objects.create(user_type=1, user=User.objects.get(username="trader8"))
     UserProfile.objects.create(user_type=2, user=User.objects.get(username="manager"))
 
     # Populating data for rating
@@ -58,16 +74,20 @@ def populateData():
     Oil.objects.create(current_unit_price=3.78)
 
     # Populating data for location
-    Location.objects.create(street="231 mccallum blvd", zipcode="75252", city="Dallas", state="Texas")
-    Location.objects.create(street="532 mccallum blvd", zipcode="67205", city="Wichita", state="Kansas")
-    Location.objects.create(street="2454 mccallum blvd", zipcode="76071", city="Newark", state="New Jersey")
-    Location.objects.create(street="23461 mccallum blvd", zipcode="11218", city="Brooklyn", state="New York")
+    Location.objects.create(street="231 crossing avenue, mccallum blvd", zipcode="75252", city="Dallas", state="Texas")
+    Location.objects.create(street="532 wilson courts, maple county", zipcode="67205", city="Wichita", state="Kansas")
+    Location.objects.create(street="2454 blueberry fields, jefersson sector ", zipcode="76071", city="Newark", state="New Jersey")
+    Location.objects.create(street="23461 spring field corners", zipcode="11218", city="Brooklyn", state="New York")
 
      # populating data for trader
     Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader1"))
     Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader2"))
     Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader3"))
     Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader4"))
+    Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader5"))
+    Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader6"))
+    Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader7"))
+    Trader.objects.create(user_profile=UserProfile.objects.get(user__username="trader8"))
 
     # populating data for client
     Client.objects.create(user_profile=UserProfile.objects.get(user__username="chandni"), mobile="4697768542", telephone="9724467318", money=500.000,
