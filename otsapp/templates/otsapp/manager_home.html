@@ -1,1 +1,79 @@
-<h1>DUMMY MANAGER HOME</h1>
+<html>
+	{% load static %}
+	<head>
+		<title>Manager Home</title>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"/>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/otsapp.css' %}"/>
+		<script type="text/javascript" src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/otsapp.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/underscore-min.js' %}"></script>
+	</head>
+	<body>
+        <script id="aggregate-container-tmpl" type="text/template">
+            <div class="row">
+                <div class="panel-in" >
+                    <div class="panel-body">
+
+                        <ul class="list-inline">
+                            <%if(view == 0) { %>
+                                <div class="col-md-4"><li>DATE</li></div>
+                            <% } else if (view == 1) { %>
+                                <div class="col-md-4"><li>WEEK</li></div>
+                            <% } else { %>
+                                <div class="col-md-4"><li>MONTH</li></div>
+                            <% } %>
+                        
+                            <div class="col-md-4"> <li>NO. OF RECORDS</li></div>
+                        </ul>
+               
+                    </div>
+                </div>
+            </div>
+            <div class="panel-default" >
+                <div class="panel-body">
+                    <% _.each(newDict, function(item) { %>
+                        <div class="row">
+                            <ul class="list-inline">
+                                <div class="col-md-4"><li><%-item.date%></li></div>
+                                <div class="col-md-4"><li><%-item.created_count%></li></div>
+                            </ul>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        </script>
+
+        <div id="manager-home-container" class="container">
+        	<nav class="navbar navbar-default navbar-fixed-top">
+                <div class="navbar-header">
+                <p class="navbar-text"><strong>Welcome {{firstname}}</strong></p>
+                <form class="navbar-form navbar-left" role="search">
+                    <div class="form-group">
+                      <input id="from-date" type="text" class="form-control" placeholder="From date (YYYY-MM-DD)">
+                    </div>
+                    <div class="form-group">
+                      <input id="to-date" type="text" class="form-control" placeholder="To date (YYYY-MM-DD)">
+                    </div>
+                    <div class="form-group">
+                        <select id="search-mode" class="form-control">
+                            <optgroup label="Group by">
+                                <option value="0">Daily</option>
+                                <option value="1">Weekly</option>
+                                <option value="2">Monthly</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <button id="manager-filter-btn" class="btn btn-default">Submit</button>
+                </form>
+                </div>
+                <div class="container">
+                    <button type="button" id="logout-btn" class="btn btn-default navbar-btn">Logout</button>
+                </div>
+            </nav>
+        
+            <div id="aggregate-container">
+            </div>
+        </div>
+	</body>
+</html>

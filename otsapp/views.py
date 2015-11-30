@@ -1,6 +1,7 @@
 import json
 import pytz
-from datetime import datetime
+import collections, calendar
+from datetime import datetime, timedelta
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse,HttpResponseRedirect
@@ -11,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.db.models import Sum,Count
+from django.db import connection
 
 from otsapp.models import UserProfile, Transaction,\
     Client, Trader, Oil, Rating
@@ -75,9 +77,58 @@ def home_dashborad(request):
             context = {"firstname":user.first_name, "transactions":transactions}
             _template = "otsapp/trader_home.html"
         else:
+            transactions = Transaction.objects.all()
+            context = {"firstname":user.first_name, "transactions":transactions}
             _template = "otsapp/manager_home.html"
 
         return render(request, _template, context=context)
+
+    elif request.method == "POST":
+        user = request.user
+        user_prof = UserProfile.objects.get(user=user)
+        if user_prof.user_type == 2:
+            data = json.loads(request.POST['data'])
+            dateF = data['from_date']
+            dateT = data['to_date']
+            group_by = data['group_by']
+            #dateF=datetime.datetime.strptime(request.POST['datef'], '%Y-%m-%d')
+            #dateT=datetime.datetime.strptime(request.POST['datet'], '%Y-%m-%d')
+            newDict=[]
+            #while dateF.date() <datetime.datetime.now().date() and dateT.date() <= datetime.datetime.now().date():
+            if group_by == 0:
+                t=Transaction.objects.filter(date__range=(dateF,dateT)).extra({'date':"date(date)"}).values('date').annotate(created_count=Count('id'))
+                for i in t:
+                    newDict.append({"date": i.get('date'), "created_count":i.get("created_count")})
+            elif group_by == 2:
+                truncate_date = connection.ops.date_trunc_sql('month', 'date')
+                qs = Transaction.objects.filter(date__range=(dateF,dateT)).extra({'month':truncate_date})
+                report = qs.values('month').annotate(Count('pk')).order_by('month')
+                for item in report:
+                    month=calendar.month_name[int(str(item.get('month'))[5:7])]
+                    num=item.get("pk__count")
+                    newDict.append({'date':month,'created_count':num})
+            else:
+                t=Transaction.objects.filter(date__range=(dateF,dateT)).extra({'date':"date(date)"}).values('date').annotate(created_count=Count('id'))
+                count=0
+                startDate=datetime.strptime(dateF, "%Y-%m-%d")
+                end=datetime.strptime(dateT, "%Y-%m-%d")
+                tempdate=startDate-timedelta(days=1)
+                weekCounter=0
+                dict1={}
+                for item in t:
+                    date=str(item.get('date'))
+                    num=item.get("created_count")
+                    dict1[date]=num
+                while tempdate<=end:
+                    weeknum=0
+                    for i in range(0,7):                    
+                        tempdate=tempdate + timedelta(days=1)
+                        actualDate=str(tempdate.year)+'-'+ str(tempdate.month) +'-'+ str(tempdate.day)
+                        if (dict1.has_key(actualDate)):
+                            weeknum += dict1[actualDate]
+                    weekCounter+=1
+                    newDict.append({'date':weekCounter,'created_count':weeknum})
+        return HttpResponse(json.dumps({'newDict':newDict, 'view':group_by}), content_type="application/json")
 
 
 def transaction(request):

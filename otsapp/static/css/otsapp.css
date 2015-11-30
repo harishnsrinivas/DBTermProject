@@ -3,7 +3,8 @@ div#clientHomeContainer{
     margin-bottom: 50px;
 }
 
-div#clientHomeContainer button.navbar-btn{
+div#clientHomeContainer button.navbar-btn,
+div#manager-home-container button#logout-btn{
 	float: right;
 }
 
@@ -29,4 +30,9 @@ ul#transaction-list,ul#recent-transaction-list{
 
 ul#transaction-list > li,ul#recent-transaction-list > li{
 	margin-top:15px; 
+}
+
+div#aggregate-container{
+	margin-top: 150px;
+    margin-left: 400px;
 }

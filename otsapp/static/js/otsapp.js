@@ -159,7 +159,23 @@ $(function() {
                 var tmpl = _.template($("#transaction-list-tmpl").html());
                 $(".clientTransactions").html(tmpl(res));
             },
-            'timeout':1000
+        });
+    });
+
+    $("#manager-filter-btn").on('click', function(ev){
+        ev.preventDefault();
+        var from_date = $("#from-date").val();
+        var to_date = $("#to-date").val();
+        var group_by = parseInt($("select#search-mode option:selected").val());
+        var data = JSON.stringify({"from_date":from_date, "to_date":to_date, "group_by":group_by});
+        $.ajax({
+            "type": "POST",
+            "url": "/ots/user/home/",
+            "data": {"data":data},
+            "success": function(res){
+                var tmpl = _.template($("#aggregate-container-tmpl").html());
+                $("#aggregate-container").html(tmpl(res));
+            },
         });
     });
 });
